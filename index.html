@@ -24,6 +24,7 @@
       const key = document.getElementById("keyInput").value.trim().toLowerCase();
       if (key === "the key") {
         window.location = "?p=002";
+        document.getElementById("status").textContent = "Success! You've entered the right key!"
       } else {
         document.getElementById("status").textContent = "Incorrect key.";
       }
