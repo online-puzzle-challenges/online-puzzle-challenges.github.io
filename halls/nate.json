@@ -8,6 +8,20 @@
       "description": "Sometimes the key is exactly what it sounds like.",
       "key": "the key",
       "hints": ["Read the instructions literally."]
+    },
+	{
+      "id": "nate-2",
+      "title": "What's behind door number two?",
+      "description": "It's not a bootyhole",
+      "key": "backdoor",
+      "hints": ["Don't go in the front door"]
+    },
+	{
+      "id": "nate-3",
+      "title": "'s the Charm",
+      "description": "Do this to your keyboard",
+      "key": "mash",
+      "hints": ["Potatoes, Korean War Drama"]
     }
   ]
 }
