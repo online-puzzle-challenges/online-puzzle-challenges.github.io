@@ -147,7 +147,9 @@ function render() {
     title.textContent = room.title;
 
     const desc = document.createElement("p");
-    desc.textContent = room.description;
+	desc.textContent = room.description; 
+	desc.innerHTML = room.description // Allows links 
+	roomDiv.appendChild(desc)
 
     roomDiv.appendChild(title);
     roomDiv.appendChild(desc);
