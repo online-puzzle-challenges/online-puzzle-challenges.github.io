@@ -2,13 +2,12 @@
  * CONFIG & STATE
  *********************************************************/
 
-const HALL_IDS = ["nate", "erik", "patty"]; // IDs of available JSON halls
+const HALL_IDS = ["nate", "erik", "patty"];
 const STORAGE_KEY = "puzzleHouseProgress";
 
-let hallsData = {};      // cache loaded halls
+let hallsData = {};
 let currentHallId = null;
 
-// Progress structure
 let progress = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
   unlockedRooms: {},
   revealedHints: {}
@@ -64,23 +63,18 @@ function relockFromRoom(hall, roomIndex) {
  * HALL LOADING
  *********************************************************/
 function loadHall(hallId) {
-  console.log("Loading hall:", hallId);
-
   if (hallsData[hallId]) {
     currentHallId = hallId;
-    console.log("Hall cached, rendering.");
     render();
     return;
   }
 
   fetch(`halls/${hallId}.json`)
     .then(res => {
-      console.log("Fetch response:", res);
       if (!res.ok) throw new Error("HTTP error " + res.status);
       return res.json();
     })
     .then(hall => {
-      console.log("Hall loaded:", hall);
       hallsData[hallId] = hall;
       currentHallId = hallId;
       render();
@@ -100,8 +94,6 @@ function populateHallDropdown() {
   });
 
   select.onchange = () => loadHall(select.value);
-
-  // Load first hall by default
   loadHall(HALL_IDS[0]);
 }
 
@@ -115,10 +107,26 @@ function render() {
   const hall = hallsData[currentHallId];
   if (!hall) return;
 
+  // Hall header
   const hallHeader = document.createElement("h2");
   hallHeader.textContent = hall.displayName;
   app.appendChild(hallHeader);
 
+  // Progress bar
+  const progressContainer = document.createElement("div");
+  progressContainer.className = "progress-container";
+
+  const progressBar = document.createElement("div");
+  progressBar.className = "progress-bar";
+
+  const unlockedCount = hall.rooms.filter(isUnlocked).length;
+  const percentComplete = Math.round((unlockedCount / hall.rooms.length) * 100);
+  progressBar.style.width = percentComplete + "%";
+
+  progressContainer.appendChild(progressBar);
+  app.appendChild(progressContainer);
+
+  // Reset hall button
   const resetHallBtn = document.createElement("button");
   resetHallBtn.textContent = "Reset Hall Progress";
   resetHallBtn.className = "danger";
@@ -130,12 +138,12 @@ function render() {
   };
   app.appendChild(resetHallBtn);
 
+  // Render rooms
   hall.rooms.forEach((room, index) => {
     const roomDiv = document.createElement("div");
     roomDiv.className = "room";
 
     const accessible = index === 0 || isUnlocked(hall.rooms[index - 1]);
-
     if (!accessible) {
       roomDiv.classList.add("locked");
       roomDiv.textContent = "🔒 Locked";
@@ -143,27 +151,31 @@ function render() {
       return;
     }
 
+    // Room title and description
     const title = document.createElement("h3");
     title.textContent = room.title;
-	
-	if (room.image) {
-	  const img = document.createElement("img");
-	  img.src = room.image;
-	  img.alt = room.title;
-	  img.style.maxWidth = "100%";
-	  img.style.marginTop = "8px";
-	  roomDiv.appendChild(img);
-	}
+    roomDiv.appendChild(title);
 
     const desc = document.createElement("p");
-	desc.textContent = room.description; 
-	desc.innerHTML = room.description // Allows links 
-	roomDiv.appendChild(desc)
-
-    roomDiv.appendChild(title);
+    desc.innerHTML = room.description; // allows links
     roomDiv.appendChild(desc);
 
-    // Show unlocked status or input
+    // Room image(s)
+    if (room.image) {
+      const img = document.createElement("img");
+      img.src = room.image;
+      img.alt = room.title;
+      roomDiv.appendChild(img);
+    }
+    if (room.images) {
+      room.images.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = room.title;
+        roomDiv.appendChild(img);
+      });
+    }
+
     if (isUnlocked(room)) {
       const status = document.createElement("p");
       status.textContent = "✅ Unlocked";
@@ -181,32 +193,13 @@ function render() {
       roomDiv.appendChild(status);
       roomDiv.appendChild(relockBtn);
 
-      // Show any already revealed hints
-      const revealed = getRevealedHintCount(room);
-      for (let i = 0; i < revealed; i++) {
-        const hintP = document.createElement("p");
-        hintP.textContent = "💡 " + room.hints[i];
-        roomDiv.appendChild(hintP);
-      }
-
-      // Show hint reveal button if more hints exist
-      if (revealed < room.hints.length) {
-        const hintBtn = document.createElement("button");
-        hintBtn.textContent = "Reveal a hint";
-        hintBtn.onclick = () => {
-          revealNextHint(room);
-          render();
-        };
-        roomDiv.appendChild(hintBtn);
-      }
-
     } else {
-      // Input for locked room
       const input = document.createElement("input");
       input.placeholder = "Enter key…";
 
       const btn = document.createElement("button");
       btn.textContent = "Unlock";
+      btn.className = "unlock";
       btn.onclick = () => {
         if (attemptUnlock(room, input.value)) {
           alert("Unlocked!");
@@ -218,27 +211,30 @@ function render() {
 
       roomDiv.appendChild(input);
       roomDiv.appendChild(btn);
+    }
 
-      // Show hints
-      const revealed = getRevealedHintCount(room);
-      for (let i = 0; i < revealed; i++) {
+    // Hints
+    const revealed = getRevealedHintCount(room);
+    room.hints.forEach((hint, i) => {
+      if (i < revealed) {
         const hintP = document.createElement("p");
-        hintP.textContent = "💡 " + room.hints[i];
+        hintP.textContent = "💡 " + hint;
+        hintP.className = "hint visible";
         roomDiv.appendChild(hintP);
       }
+    });
 
-      // Reveal button if more hints
-      if (revealed < room.hints.length) {
-        const hintBtn = document.createElement("button");
-        hintBtn.textContent = "Reveal a hint";
-        hintBtn.onclick = () => {
-          revealNextHint(room);
-          render();
-        };
-        roomDiv.appendChild(hintBtn);
-      }
+    if (revealed < room.hints.length) {
+      const hintBtn = document.createElement("button");
+      hintBtn.textContent = "Reveal a hint";
+      hintBtn.className = "hint";
+      hintBtn.onclick = () => {
+        revealNextHint(room);
+        render();
+      };
+      roomDiv.appendChild(hintBtn);
     }
-	
+
     app.appendChild(roomDiv);
   });
 }
