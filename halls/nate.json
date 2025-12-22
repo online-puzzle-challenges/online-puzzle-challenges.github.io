@@ -1,0 +1,13 @@
+{
+  "id": "nate",
+  "displayName": "Nate’s Puzzle Hall",
+  "rooms": [
+    {
+      "id": "nate-1",
+      "title": "The First Door",
+      "description": "Sometimes the key is exactly what it sounds like.",
+      "key": "the key",
+      "hints": ["Read the instructions literally."]
+    }
+  ]
+}
