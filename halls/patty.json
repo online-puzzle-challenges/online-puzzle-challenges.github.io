@@ -4,10 +4,10 @@
   "rooms": [
     {
       "id": "patty-1",
-      "title": "First Door Title Goes Here",
-      "description": "Description Goes Here",
-      "key": "",
-      "hints": ["Hints can be left blank"]
+      "title": "I stole this from Zed",
+      "description": "Pikachu, Beedrill, Raticate, Raticate, Bulbasaur, Weedle, Charmeleon, Raticate, Charmeleon, Pidgeot",
+      "key": "yottametter",
+      "hints": ["Time to look up the Dex!","How many letters in the alphabet?"]
     },
 	{
       "id": "patty-2",
