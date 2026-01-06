@@ -14,7 +14,7 @@
       "id": "haunted-2",
       "title": "Front Room",
       "description": "The door opens, and you step inside—but there’s no one here. In fact, the house is silent, dark. You proceed to the sitting room. The sickly green wallpaper oozes with something foul. The lights are flickering. Something must be trying to communicate with you. You notice that the chandeliers are numbered 1-6, and notice that the lights are flickering in a pattern of six short flashes and three long flashes.",
-      "key": "SOS",
+      "key": "sos",
       "hints": ["someone must be in trouble","just use the letters"]
     },
 
